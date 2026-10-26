@@ -1,0 +1,1054 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Coby Picks API",
+    "version": "1.0.0",
+    "description": "REST endpoints provided by the Coby Picks Next.js server. Wheel, activity, and live-room data are primarily accessed through Firebase and are not represented as REST endpoints here. Legacy account lookup and account-management routes that need stronger authorization are intentionally omitted. Some documented endpoints send email or change account data; use test accounts when trying them."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Current deployment"
+    }
+  ],
+  "tags": [
+    {
+      "name": "health",
+      "description": "Connectivity and service status."
+    },
+    {
+      "name": "signup",
+      "description": "Email verification and account registration."
+    },
+    {
+      "name": "password-recovery",
+      "description": "Password recovery verification and updates."
+    },
+    {
+      "name": "admin-mfa",
+      "description": "Admin Firebase-token verification and second-factor flows."
+    },
+    {
+      "name": "admin-users",
+      "description": "Admin account-management operations."
+    },
+    {
+      "name": "configuration",
+      "description": "Server configuration diagnostics."
+    }
+  ],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "The server reports its health status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "head": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health connectivity check",
+        "responses": {
+          "200": {
+            "description": "The server is reachable."
+          }
+        }
+      },
+      "options": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health CORS preflight",
+        "responses": {
+          "200": {
+            "description": "CORS preflight response."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Health endpoint POST diagnostic",
+        "description": "Echoes the submitted JSON body. Intended for connectivity diagnostics.",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/JsonObject"
+        },
+        "responses": {
+          "200": {
+            "description": "The request body was received.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthPostResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/send-signup-verification": {
+      "post": {
+        "tags": [
+          "signup"
+        ],
+        "summary": "Send signup verification code",
+        "description": "Sends a six-digit verification code to an email address not already registered.",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/SignupVerificationRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/VerificationSent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/verify-signup-code": {
+      "post": {
+        "tags": [
+          "signup"
+        ],
+        "summary": "Verify signup code",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/VerificationCodeRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/CodeVerified"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/mobile-signup-verification": {
+      "post": {
+        "tags": [
+          "signup"
+        ],
+        "summary": "Send mobile signup verification code",
+        "description": "Mobile registration variant; includes recovery email and role in the request.",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/MobileSignupVerificationRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/VerificationSent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/mobile-verify-signup-code": {
+      "post": {
+        "tags": [
+          "signup"
+        ],
+        "summary": "Verify code and create mobile account",
+        "description": "Creates a Firebase Auth account and Firestore profile after code verification. The web flow may submit the special code \"VERIFIED\" after completing its separate email verification step.",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/MobileSignupRequest"
+        },
+        "responses": {
+          "200": {
+            "description": "The account was created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountCreatedResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/send-reset-verification": {
+      "post": {
+        "tags": [
+          "password-recovery"
+        ],
+        "summary": "Send password recovery code",
+        "description": "Accepts a primary email or recovery email. The response is intentionally generic when no account is found.",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/EmailRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/VerificationSent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/mobile-reset-verification": {
+      "post": {
+        "tags": [
+          "password-recovery"
+        ],
+        "summary": "Send mobile password recovery code",
+        "description": "Mobile variant of password recovery; accepts a primary email or recovery email.",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/EmailRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/VerificationSent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/verify-reset-code": {
+      "post": {
+        "tags": [
+          "password-recovery"
+        ],
+        "summary": "Verify password recovery code",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/VerificationCodeRequest"
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/CodeVerified"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/mobile-verify-reset-code": {
+      "post": {
+        "tags": [
+          "password-recovery"
+        ],
+        "summary": "Verify mobile recovery code",
+        "description": "Returns a reset token after a valid code. The route currently returns a generated token value.",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/VerificationCodeRequest"
+        },
+        "responses": {
+          "200": {
+            "description": "The code was verified.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "verified": {
+                      "type": "boolean"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email"
+                    },
+                    "resetToken": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/admin-mfa/status": {
+      "get": {
+        "tags": [
+          "admin-mfa"
+        ],
+        "summary": "Check admin second-factor status",
+        "security": [
+          {
+            "FirebaseIdToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The current Firebase sign-in second-factor status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "verified": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "verified"
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/admin-mfa/send": {
+      "post": {
+        "tags": [
+          "admin-mfa"
+        ],
+        "summary": "Send admin sign-in code",
+        "description": "Requires an admin Firebase ID token. Sending to the backup address replaces the pending code.",
+        "security": [
+          {
+            "FirebaseIdToken": []
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "target": {
+                    "type": "string",
+                    "enum": [
+                      "primary",
+                      "backup"
+                    ],
+                    "default": "primary"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The code was sent or queued for delivery."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/admin-mfa/verify": {
+      "post": {
+        "tags": [
+          "admin-mfa"
+        ],
+        "summary": "Verify admin sign-in code",
+        "security": [
+          {
+            "FirebaseIdToken": []
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/CodeOnlyRequest"
+        },
+        "responses": {
+          "200": {
+            "description": "The code is valid and the admin sign-in is marked verified."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/auth/admin-mfa/backup-email": {
+      "get": {
+        "tags": [
+          "admin-mfa"
+        ],
+        "summary": "Get admin backup email settings",
+        "security": [
+          {
+            "FirebaseIdToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current primary and backup email settings."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "admin-mfa"
+        ],
+        "summary": "Manage admin backup email",
+        "description": "Requires an admin Firebase ID token and a verified second factor for this sign-in.",
+        "security": [
+          {
+            "FirebaseIdToken": []
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/BackupEmailActionRequest"
+        },
+        "responses": {
+          "200": {
+            "description": "The backup email action completed."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/admin/delete-user": {
+      "post": {
+        "tags": [
+          "admin-users"
+        ],
+        "summary": "Delete a user account",
+        "description": "Requires an admin Firebase ID token and a verified second factor. Protected admin accounts cannot be deleted.",
+        "security": [
+          {
+            "FirebaseIdToken": []
+          }
+        ],
+        "requestBody": {
+          "$ref": "#/components/requestBodies/DeleteUserRequest"
+        },
+        "responses": {
+          "200": {
+            "description": "The account was deleted."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "description": "The target is a protected admin account."
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/admin/test-create-user": {
+      "post": {
+        "tags": [
+          "admin-users"
+        ],
+        "summary": "Simulate user creation (test only)",
+        "description": "Returns a simulated user-creation response; it does not create a real account.",
+        "requestBody": {
+          "$ref": "#/components/requestBodies/TestCreateUserRequest"
+        },
+        "responses": {
+          "200": {
+            "description": "A simulated account result."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/api/admin/config-check": {
+      "get": {
+        "tags": [
+          "configuration"
+        ],
+        "summary": "Check Firebase Admin configuration",
+        "description": "Reports whether required Firebase Admin settings appear configured. Secret values are not returned.",
+        "responses": {
+          "200": {
+            "description": "The configuration status and validation details."
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "FirebaseIdToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "Firebase ID token",
+        "description": "Paste the Firebase Authentication ID token, without the \"Bearer \" prefix."
+      }
+    },
+    "requestBodies": {
+      "JsonObject": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "EmailRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "email"
+              ],
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email"
+                }
+              }
+            }
+          }
+        }
+      },
+      "SignupVerificationRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "email",
+                "firstName",
+                "lastName"
+              ],
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "MobileSignupVerificationRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "email",
+                "firstName",
+                "lastName",
+                "recoveryEmail",
+                "role"
+              ],
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                },
+                "recoveryEmail": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "role": {
+                  "type": "string",
+                  "description": "Application role."
+                }
+              }
+            }
+          }
+        }
+      },
+      "VerificationCodeRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "email",
+                "code"
+              ],
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "code": {
+                  "type": "string",
+                  "pattern": "^\\d{6}$"
+                }
+              }
+            }
+          }
+        }
+      },
+      "MobileSignupRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "email",
+                "code",
+                "firstName",
+                "lastName",
+                "role",
+                "password"
+              ],
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "code": {
+                  "type": "string",
+                  "description": "Six-digit code, or VERIFIED for the web completion flow."
+                },
+                "firstName": {
+                  "type": "string"
+                },
+                "lastName": {
+                  "type": "string"
+                },
+                "recoveryEmail": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string",
+                  "format": "password",
+                  "minLength": 7
+                },
+                "teacherConsent": {
+                  "type": "boolean"
+                },
+                "dataProcessingConsent": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      },
+      "CodeOnlyRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "code"
+              ],
+              "properties": {
+                "code": {
+                  "type": "string",
+                  "pattern": "^\\d{6}$"
+                }
+              }
+            }
+          }
+        }
+      },
+      "BackupEmailActionRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "action"
+              ],
+              "properties": {
+                "action": {
+                  "type": "string",
+                  "enum": [
+                    "start",
+                    "confirm",
+                    "remove"
+                  ]
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "description": "Required for action=start."
+                },
+                "code": {
+                  "type": "string",
+                  "pattern": "^\\d{6}$",
+                  "description": "Required for action=confirm."
+                }
+              }
+            }
+          }
+        }
+      },
+      "DeleteUserRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "uid"
+              ],
+              "properties": {
+                "uid": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "TestCreateUserRequest": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "required": [
+                "name",
+                "email",
+                "password",
+                "role",
+                "adminEmail"
+              ],
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "password": {
+                  "type": "string",
+                  "format": "password"
+                },
+                "role": {
+                  "type": "string"
+                },
+                "adminEmail": {
+                  "type": "string",
+                  "format": "email"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "The request is invalid.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "A valid admin Firebase ID token is required.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "ServerError": {
+        "description": "The server could not process the request.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ErrorResponse"
+            }
+          }
+        }
+      },
+      "VerificationSent": {
+        "description": "The request was accepted; an email may have been sent.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email"
+                }
+              }
+            }
+          }
+        }
+      },
+      "CodeVerified": {
+        "description": "The verification code is valid.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean"
+                },
+                "verified": {
+                  "type": "boolean"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "success"
+        ]
+      },
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "healthy",
+              "unhealthy"
+            ]
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "version": {
+            "type": "string"
+          },
+          "environment": {
+            "type": "string"
+          },
+          "network": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "services": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "HealthPostResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "receivedData": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "AccountCreatedResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "user": {
+            "type": "object",
+            "properties": {
+              "uid": {
+                "type": "string"
+              },
+              "email": {
+                "type": "string",
+                "format": "email"
+              },
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
+              },
+              "fullName": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,721 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#8e0b16">
+    <meta name="description" content="Interactive REST API reference for Coby Picks.">
+    <title>Coby Picks API</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #101114;
+        color: #f4f4f5;
+        font-synthesis: none;
+        text-rendering: optimizeLegibility;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; background: #101114; }
+      a { color: #f4a7af; }
+      .shell { width: min(1180px, calc(100% - 36px)); margin: 0 auto; }
+      .hero { padding: 45px 0 28px; border-bottom: 1px solid #292a30; }
+      .eyebrow { color: #f28c98; font-size: .76rem; font-weight: 750; letter-spacing: .14em; text-transform: uppercase; }
+      h1 { margin: 12px 0 8px; font-size: clamp(2rem, 5vw, 3rem); letter-spacing: -.045em; }
+      .intro { max-width: 780px; margin: 0; color: #b8b8c0; font-size: .98rem; line-height: 1.7; }
+      .status { min-height: 24px; margin: 10px 0 0; color: #b8b8c0; font-size: .86rem; }
+      .status.error { color: #ff929c; }
+      .links { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 11px; font-size: .85rem; }
+      .api-overview { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 20px; }
+      .overview-item { display: inline-flex; align-items: baseline; gap: 7px; padding: 8px 11px; border: 1px solid #eadadd; border-radius: 7px; background: #fff; color: #646879; font-size: .79rem; }
+      .overview-item strong { color: #272a34; font-size: .88rem; }
+      .group-nav { display: flex; gap: 8px; overflow-x: auto; padding: 2px 1px 10px; scrollbar-width: thin; }
+      .group-nav a { flex: 0 0 auto; padding: 7px 11px; border: 1px solid #e5dadd; border-radius: 99px; background: #fff; color: #5d2630; font-size: .79rem; font-weight: 650; text-decoration: none; }
+      .group-nav a:hover { border-color: #8e0b16; background: #fff6f7; color: #710811; }
+      .header-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+      .header-copy { min-width: 0; }
+      .authorize-button { flex: 0 0 auto; min-height: 42px; padding: 0 17px; border: 1px solid #8e0b16; border-radius: 8px; background: #8e0b16; color: #fff; cursor: pointer; font-weight: 750; }
+      .authorize-button:hover { background: #710811; }
+      .authorize-button.is-authorized { border-color: #21623e; background: #21623e; }
+      .auth-dialog { width: min(520px, calc(100% - 28px)); max-height: min(84vh, 680px); padding: 0; overflow: auto; border: 1px solid #e1e3e8; border-radius: 14px; background: #fff; color: #191b23; box-shadow: 0 24px 80px #17131a38; }
+      .auth-dialog::backdrop { background: #191b2380; backdrop-filter: blur(3px); }
+      .auth-dialog-content { padding: clamp(18px, 5vw, 28px); }
+      .auth-dialog h2 { margin: 0 0 8px; font-size: 1.3rem; }
+      .auth-dialog p { color: #626776; font-size: .9rem; line-height: 1.6; }
+      .auth-dialog label { display: grid; gap: 8px; margin-top: 18px; color: #343846; font-size: .85rem; font-weight: 650; }
+      .auth-dialog input { width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid #d8dae1; border-radius: 7px; color: #191b23; font: .85rem ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      .auth-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 18px; }
+      .auth-actions button { min-height: 42px; padding: 0 15px; border: 1px solid #d8dae1; border-radius: 7px; background: #fff; color: #343846; cursor: pointer; font-weight: 650; }
+      .auth-actions .auth-apply { border-color: #8e0b16; background: #8e0b16; color: #fff; }
+      .auth-actions .auth-apply:hover { background: #710811; }
+      .auth-status { min-height: 1.5em; margin: 12px 0 0; color: #626776; font-size: .83rem; }
+      .auth-status.error { color: #8e0b16; }
+      main { padding: 18px 0 60px; }
+      .toolbar { display: grid; grid-template-columns: minmax(0, 1fr) minmax(220px, .8fr); gap: 14px; margin: 20px 0; padding: 18px; border: 1px solid #292a30; border-radius: 12px; background: #17181c; }
+      .toolbar label, .tryout label { display: grid; gap: 7px; color: #d8d8df; font-size: .84rem; font-weight: 650; }
+      .toolbar input, .tryout textarea { width: 100%; min-width: 0; padding: 10px 12px; border: 1px solid #44454d; border-radius: 7px; outline: none; background: #101114; color: #f4f4f5; font: inherit; }
+      .toolbar input:focus, .tryout textarea:focus { border-color: #ed8793; }
+      .api-group { margin: 28px 0; }
+      .group-heading { display: flex; align-items: baseline; gap: 12px; margin: 0; padding: 0 0 10px; border-bottom: 1px solid #393a41; font-size: 1.15rem; text-transform: lowercase; }
+      .group-count { color: #90909a; font-size: .77rem; font-weight: 500; }
+      .group-description { margin: 9px 0 14px; color: #aeb0ba; font-size: .89rem; line-height: 1.6; }
+      .endpoint-list { display: grid; gap: 9px; }
+      .endpoint { overflow: hidden; border: 1px solid #32333a; border-radius: 9px; background: #17181c; }
+      .endpoint-summary { display: grid; grid-template-columns: 76px minmax(220px, .9fr) minmax(150px, 1fr) 24px; align-items: center; gap: 13px; width: 100%; padding: 13px 15px; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+      .endpoint-summary:hover { background: #202127; }
+      .method { display: inline-flex; justify-content: center; min-width: 54px; padding: 5px 8px; border-radius: 5px; font-size: .72rem; font-weight: 800; letter-spacing: .04em; }
+      .method-get, .method-head { background: #173d31; color: #8fe0b2; }
+      .method-post { background: #18395a; color: #8acaff; }
+      .method-put, .method-patch { background: #4a3821; color: #f5c87e; }
+      .method-delete { background: #4b2428; color: #ff9ca3; }
+      .endpoint-path { color: #f1f0f4; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .84rem; overflow-wrap: anywhere; }
+      .endpoint-summary-text { color: #b9bac3; font-size: .86rem; line-height: 1.4; }
+      .chevron { color: #9c9da7; font-size: 1rem; }
+      .endpoint-details { display: none; padding: 3px 16px 18px; border-top: 1px solid #303139; }
+      .endpoint.is-open .endpoint-details { display: block; }
+      .endpoint-description { margin: 12px 0; color: #c4c4cc; font-size: .88rem; line-height: 1.6; }
+      .detail-label { display: block; margin: 14px 0 7px; color: #eeeeF2; font-size: .8rem; font-weight: 750; }
+      .schema-view, .response-list, .tryout pre { margin: 0; padding: 12px; overflow: auto; border: 1px solid #303139; border-radius: 7px; background: #111216; color: #c6d6f0; font: .78rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+      .tryout { display: grid; gap: 12px; margin-top: 14px; }
+      .tryout textarea { min-height: 120px; resize: vertical; font: .8rem/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      .tryout button, .schema-heading { width: fit-content; padding: 8px 13px; border: 1px solid #555761; border-radius: 6px; background: #23242a; color: #f2f2f5; cursor: pointer; font: inherit; font-size: .8rem; font-weight: 650; }
+      .tryout button:hover, .schema-heading:hover { background: #303139; }
+      .tryout button:disabled { cursor: wait; opacity: .65; }
+      .tryout-result { display: grid; gap: 7px; color: #c4c4cc; font-size: .82rem; }
+      .schemas { margin-top: 38px; border-top: 1px solid #393a41; padding-top: 18px; }
+      .schemas h2 { margin: 0 0 14px; font-size: 1.1rem; }
+      .schema-item { margin: 7px 0; border: 1px solid #32333a; border-radius: 8px; background: #17181c; }
+      .schema-heading { display: flex; width: 100%; justify-content: space-between; border: 0; background: transparent; text-align: left; }
+      .schema-content { display: none; padding: 12px; }
+      .schema-item.is-open .schema-content { display: block; }
+      .empty-state { padding: 25px; border: 1px dashed #45464e; border-radius: 9px; color: #b8b8c0; text-align: center; }
+
+      @media (max-width: 620px) {
+        .shell { width: min(100% - 24px, 1180px); }
+        .hero { padding-top: 30px; }
+        .toolbar { grid-template-columns: 1fr; }
+        .endpoint-summary { grid-template-columns: 58px minmax(0, 1fr) 18px; gap: 8px; padding: 12px 10px; }
+        .endpoint-summary-text { grid-column: 2; }
+        .endpoint-summary .chevron { grid-column: 3; grid-row: 1 / span 2; }
+      }
+
+      :root {
+        color-scheme: light;
+        background: #f5f5f7;
+        color: #191b23;
+        --brand: #8e0b16;
+        --brand-hover: #710811;
+        --brand-soft: #fff0f1;
+        --ink: #191b23;
+        --muted: #626776;
+        --line: #e1e3e8;
+        --surface: #fff;
+        --canvas: #f5f5f7;
+        scroll-behavior: smooth;
+      }
+
+      body { background: var(--canvas); color: var(--ink); }
+      a { color: var(--brand); text-underline-offset: 3px; }
+      a:hover { color: var(--brand-hover); }
+      button, input, textarea { font: inherit; }
+      button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+        outline: 3px solid #8e0b1640;
+        outline-offset: 2px;
+      }
+      .hero {
+        position: relative;
+        overflow: hidden;
+        border-bottom: 1px solid #eadadd;
+        background:
+          radial-gradient(ellipse at 84% 12%, #8e0b1614 0, transparent 32%),
+          linear-gradient(135deg, #fff 0%, #fffafb 58%, #f8edef 100%);
+      }
+      .eyebrow { color: var(--brand); }
+      h1 { color: var(--ink); }
+      .intro { color: #505563; }
+      .toolbar input, .tryout textarea {
+        border-color: #d8dae1;
+        background: #fff;
+        color: var(--ink);
+        box-shadow: 0 1px 2px #12162908;
+      }
+      .toolbar input:focus, .tryout textarea:focus {
+        border-color: var(--brand);
+        box-shadow: 0 0 0 3px #8e0b1618;
+      }
+      .tryout button {
+        min-height: 42px;
+        border: 1px solid var(--brand);
+        background: var(--brand);
+        color: #fff;
+        transition: background .15s ease, transform .15s ease, box-shadow .15s ease;
+      }
+      .tryout button:hover {
+        border-color: var(--brand-hover);
+        background: var(--brand-hover);
+        box-shadow: 0 4px 12px #8e0b1626;
+        transform: translateY(-1px);
+      }
+      .tryout button:disabled {
+        cursor: wait;
+        opacity: .72;
+        transform: none;
+      }
+      .status { color: var(--muted); line-height: 1.55; }
+      .status.error {
+        padding: 10px 12px;
+        border: 1px solid #efb9bd;
+        border-radius: 8px;
+        background: #fff0f0;
+        color: #8e0b16;
+      }
+      .links { gap: 10px 18px; }
+      .toolbar {
+        position: sticky;
+        z-index: 5;
+        top: 10px;
+        border-color: var(--line);
+        background: #ffffffef;
+        box-shadow: 0 8px 24px #191b230b;
+        backdrop-filter: blur(12px);
+      }
+      .toolbar label, .tryout label { color: #343846; }
+      .toolbar input { min-height: 42px; }
+      .api-group {
+        margin: 30px 0 38px;
+        padding: 20px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: #fff;
+        box-shadow: 0 3px 12px #191b2307;
+        scroll-margin-top: 24px;
+      }
+      .group-heading {
+        padding-bottom: 13px;
+        border-bottom-color: #ece5e6;
+        color: var(--brand);
+        font-size: 1.16rem;
+        letter-spacing: .015em;
+      }
+      .group-count {
+        padding: 3px 8px;
+        border: 1px solid #f0d8da;
+        border-radius: 99px;
+        background: var(--brand-soft);
+        color: var(--brand);
+        font-size: .7rem;
+      }
+      .group-description { color: var(--muted); }
+      .endpoint-list { gap: 8px; }
+      .endpoint {
+        border-color: #e4e5ea;
+        background: #fff;
+        transition: border-color .15s ease, box-shadow .15s ease;
+      }
+      .endpoint:hover, .endpoint.is-open {
+        border-color: #d9adb1;
+        box-shadow: 0 3px 12px #8e0b160c;
+      }
+      .endpoint-summary { gap: 12px; min-height: 58px; color: var(--ink); }
+      .endpoint-summary:hover { background: #fffafb; }
+      .endpoint-summary:focus-visible { position: relative; z-index: 1; }
+      .method {
+        min-width: 62px;
+        border: 1px solid transparent;
+        letter-spacing: .055em;
+      }
+      .method-get, .method-head { border-color: #a6dec0; background: #eaf8ef; color: #146239; }
+      .method-post { border-color: #b9d5fc; background: #eef5ff; color: #1556a1; }
+      .method-put, .method-patch { border-color: #eed49b; background: #fff7e5; color: #80580a; }
+      .method-delete { border-color: #efb9bd; background: #fff0f0; color: #9e1e2a; }
+      .endpoint-path { color: #282b35; font-size: .82rem; }
+      .endpoint-summary-text { color: #626776; }
+      .chevron { color: var(--brand); font-weight: 800; }
+      .endpoint-details { border-top-color: #eee8e9; }
+      .endpoint-description { color: #565c6b; }
+      .detail-label { color: #353947; }
+      .schema-view, .response-list, .tryout pre {
+        border-color: #e3e5ea;
+        background: #f7f8fa;
+        color: #343b4b;
+      }
+      .tryout { padding-top: 4px; }
+      .tryout textarea { min-height: 150px; }
+      .tryout-result { color: #444957; }
+      .tryout-result .response-status { font-weight: 750; }
+      .tryout-result.is-success .response-status { color: #146239; }
+      .tryout-result.is-error .response-status { color: #9e1e2a; }
+      .tryout button { width: fit-content; min-width: 100px; padding: 8px 15px; }
+      .schemas {
+        border-top-color: var(--line);
+        border-radius: 14px;
+      }
+      .schemas h2 { color: var(--brand); }
+      .schema-item { border-color: var(--line); background: #fff; }
+      .schema-heading {
+        width: 100%;
+        min-height: 44px;
+        border: 0;
+        background: #fff;
+        color: var(--ink);
+        text-align: left;
+      }
+      .schema-heading:hover { background: #fffafb; }
+      .schema-heading span:last-child { color: var(--brand); }
+      .schema-content { border-top: 1px solid #eee8e9; }
+      .empty-state {
+        border-color: #d9adb1;
+        background: #fffafb;
+        color: #565c6b;
+      }
+      #list-status, .tryout-result { overflow-wrap: anywhere; }
+
+      @media (max-width: 760px) {
+        .hero { padding: 32px 0 24px; }
+        .api-group { padding: 16px; }
+        .endpoint-summary {
+          grid-template-columns: 66px minmax(0, 1fr) 18px;
+          gap: 8px 10px;
+        }
+        .endpoint-summary-text { grid-column: 2; }
+        .endpoint-summary .chevron { grid-column: 3; grid-row: 1 / span 2; }
+      }
+      @media (max-width: 480px) {
+        .shell { width: calc(100% - 24px); }
+        .hero { padding-top: 26px; }
+        .header-row { align-items: center; gap: 12px; }
+        .authorize-button { min-height: 40px; padding: 0 12px; font-size: .82rem; }
+        h1 { font-size: 2rem; }
+        .intro { font-size: .91rem; }
+        .links { gap: 12px; font-size: .81rem; }
+        main { padding-top: 8px; }
+        .toolbar { position: static; gap: 12px; padding: 13px; }
+        .api-group { margin: 20px 0 24px; padding: 13px; border-radius: 11px; }
+        .group-heading { font-size: 1.03rem; }
+        .endpoint-summary {
+          grid-template-columns: 56px minmax(0, 1fr) 14px;
+          gap: 7px;
+          padding: 11px 8px;
+        }
+        .method { min-width: 52px; padding: 4px; font-size: .66rem; }
+        .endpoint-path { font-size: .74rem; }
+        .endpoint-summary-text { font-size: .78rem; }
+        .endpoint-details { padding: 3px 10px 14px; }
+        .schema-view, .response-list, .tryout pre { padding: 9px; font-size: .72rem; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          scroll-behavior: auto !important;
+          transition-duration: .01ms !important;
+          animation-duration: .01ms !important;
+          animation-iteration-count: 1 !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="shell">
+        <div class="header-row">
+          <div class="header-copy">
+            <div class="eyebrow">Coby Picks · API Reference</div>
+            <h1>REST API</h1>
+            <p class="intro">
+              REST API reference for Coby Picks. These are the real server endpoints implemented
+              by the Coby Picks web app; the mobile application uses this same API server.
+              Wheel, activity, and live-room data are primarily accessed through Firebase
+              rather than REST.
+            </p>
+          </div>
+          <button class="authorize-button" id="authorize-open" type="button">Authorize</button>
+        </div>
+        <div class="api-overview" aria-label="API overview">
+          <span class="overview-item"><strong id="api-version">v1</strong> API version</span>
+          <span class="overview-item"><strong id="api-endpoint-count">—</strong> endpoints</span>
+          <span class="overview-item"><strong id="api-category-count">—</strong> categories</span>
+        </div>
+        <nav class="links" aria-label="API reference resources">
+          <a id="openapi-link" href="#" download="coby-picks-openapi.json" hidden>Download OpenAPI JSON</a>
+          <a href="https://coby-picks-web-csww.vercel.app/" target="_blank" rel="noreferrer">Open web app</a>
+          <a href="https://moblieapplicationcobypicks2026.vercel.app/auth" target="_blank" rel="noreferrer">Open mobile app</a>
+          <a href="https://github.com/Kyletzyyyicy12/coby-picks-web" target="_blank" rel="noreferrer">Source repository</a>
+        </nav>
+      </div>
+    </header>
+    <dialog class="auth-dialog" id="authorize-dialog" aria-labelledby="authorize-title">
+      <form class="auth-dialog-content" id="authorize-form">
+        <h2 id="authorize-title">API authorization</h2>
+        <p>
+          Paste a Firebase Authentication ID token to send it as
+          <code>Authorization: Bearer &lt;token&gt;</code> with API requests.
+          Admin endpoints check the account’s role and may also require a verified
+          admin sign-in code.
+        </p>
+        <p>
+          Use a real token from a Coby Picks sign-in. There are no simulated role presets.
+          The token stays in this page’s memory and is not saved to browser storage.
+        </p>
+        <label for="firebase-token">Firebase ID token
+          <input id="firebase-token" type="password" autocomplete="off" placeholder="Paste Firebase ID token" spellcheck="false">
+        </label>
+        <p id="authorize-status" class="auth-status" role="status" aria-live="polite"></p>
+        <div class="auth-actions">
+          <button class="auth-apply" type="submit">Authorize</button>
+          <button id="authorize-clear" type="button">Remove token</button>
+          <button id="authorize-close" type="button">Close</button>
+        </div>
+      </form>
+    </dialog>
+    <main class="shell">
+      <section class="toolbar" aria-label="API reference controls">
+        <label for="endpoint-filter">Filter endpoints
+          <input id="endpoint-filter" type="search" placeholder="Filter by endpoint, method, or description">
+        </label>
+      </section>
+      <p class="status" id="list-status" role="status" aria-live="polite">Loading Coby Picks endpoints…</p>
+      <nav class="group-nav" id="group-nav" aria-label="Jump to API category"></nav>
+      <div id="endpoint-groups"></div>
+      <section class="schemas" id="schemas-section">
+        <h2>Schemas</h2>
+        <div id="schema-list"></div>
+      </section>
+    </main>
+    <script type="application/json" id="openapi-spec">{"openapi":"3.1.0","info":{"title":"Coby Picks API","version":"1.0.0","description":"REST endpoints provided by the Coby Picks Next.js server. Wheel, activity, and live-room data are primarily accessed through Firebase and are not represented as REST endpoints here. Legacy account lookup and account-management routes that need stronger authorization are intentionally omitted. Some documented endpoints send email or change account data; use test accounts when trying them."},"servers":[{"url":"/","description":"Current deployment"}],"tags":[{"name":"health","description":"Connectivity and service status."},{"name":"signup","description":"Email verification and account registration."},{"name":"password-recovery","description":"Password recovery verification and updates."},{"name":"admin-mfa","description":"Admin Firebase-token verification and second-factor flows."},{"name":"admin-users","description":"Admin account-management operations."},{"name":"configuration","description":"Server configuration diagnostics."}],"paths":{"/api/health":{"get":{"tags":["health"],"summary":"Health check","responses":{"200":{"description":"The server reports its health status.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HealthResponse"}}}},"500":{"$ref":"#/components/responses/ServerError"}}},"head":{"tags":["health"],"summary":"Health connectivity check","responses":{"200":{"description":"The server is reachable."}}},"options":{"tags":["health"],"summary":"Health CORS preflight","responses":{"200":{"description":"CORS preflight response."}}},"post":{"tags":["health"],"summary":"Health endpoint POST diagnostic","description":"Echoes the submitted JSON body. Intended for connectivity diagnostics.","requestBody":{"$ref":"#/components/requestBodies/JsonObject"},"responses":{"200":{"description":"The request body was received.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/HealthPostResponse"}}}},"500":{"$ref":"#/components/responses/ServerError"}}}},"/api/auth/send-signup-verification":{"post":{"tags":["signup"],"summary":"Send signup verification code","description":"Sends a six-digit verification code to an email address not already registered.","requestBody":{"$ref":"#/components/requestBodies/SignupVerificationRequest"},"responses":{"200":{"$ref":"#/components/responses/VerificationSent"},"400":{"$ref":"#/components/responses/BadRequest"},"500":{"$ref":"#/components/responses/ServerError"}}}},"/api/auth/verify-signup-code":{"post":{"tags":["signup"],"summary":"Verify signup code","requestBody":{"$ref":"#/components/requestBodies/VerificationCodeRequest"},"responses":{"200":{"$ref":"#/components/responses/CodeVerified"},"400":{"$ref":"#/components/responses/BadRequest"},"500":{"$ref":"#/components/responses/ServerError"}}}},"/api/auth/mobile-signup-verification":{"post":{"tags":["signup"],"summary":"Send mobile signup verification code","description":"Mobile registration variant; includes recovery email and role in the request.","requestBody":{"$ref":"#/components/requestBodies/MobileSignupVerificationRequest"},"responses":{"200":{"$ref":"#/components/responses/VerificationSent"},"400":{"$ref":"#/components/responses/BadRequest"},"500":{"$ref":"#/components/responses/ServerError"}}}},"/api/auth/mobile-verify-signup-code":{"post":{"tags":["signup"],"summary":"Verify code and create mobile account","description":"Creates a Firebase Auth account and Firestore profile after code verification. The web flow may submit the special code \"VERIFIED\" after completing its separate email verification step.","requestBody":{"$ref":"#/components/requestBodies/MobileSignupRequest"},"responses":{"200":{"description":"The account was created.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/AccountCreatedResponse"}}}},"400":{"$ref":"#/components/responses/BadRequest"},"500":{"$ref":"#/components/responses/ServerError"}}}},"/api/auth/send-reset-verification":{"post":{"tags":["password-recovery"],"summary":"Send password recovery code","description":"Accepts a primary email or recovery email. The response is intentionally generic when no account is found.","requestBody":{"$ref":"#/components/requestBodies/EmailRequest"},"responses":{"200":{"$ref":"#/components/responses/VerificationSent"},"400":{"$ref":"#/components/responses/BadRequest"},"500":{"$ref":"#/components/responses/ServerError"}}}},"/api/auth/mobile-reset-verification":{"post":{"tags":["password-recovery"],"summary":"Send mobile password recovery code","description":"Mobile variant of password recovery; accepts a primary email or recovery email.","requestBody":{"$ref":"#/components/requestBodies/EmailRequest"},"responses":{"200":{"$ref":"#/components/responses/VerificationSent"},"400":{"$ref":"#/components/responses/BadRequest"},"500":{"$ref":"#/components/responses/ServerError"}}}},"/api/auth/verify-reset-code":{"post":{"tags":["password-recovery"],"summary":"Verify password recovery code","requestBody":{"$ref":"#/components/requestBodies/VerificationCodeRequest"},"responses":{"200":{"$ref":"#/components/responses/CodeVerified"},"400":{"$ref":"#/components/responses/BadRequest"},"500":{"$ref":"#/components/responses/ServerError"}}}},"/api/auth/mobile-verify-reset-code":{"post":{"tags":["password-recovery"],"summary":"Verify mobile recovery code","description":"Returns a reset token after a valid code. The route currently returns a generated token value.","requestBody":{"$ref":"#/components/requestBodies/VerificationCodeRequest"},"responses":{"200":{"description":"The code was verified.","content":{"application/json":{"schema":{"type":"object","properties":{"success":{"type":"boolean"},"verified":{"type":"boolean"},"email":{"type":"string","format":"email"},"resetToken":{"type":"string"},"message":{"type":"string"}}}}}},"400":{"$ref":"#/components/responses/BadRequest"},"500":{"$ref":"#/components/responses/ServerError"}}}},"/api/auth/admin-mfa/status":{"get":{"tags":["admin-mfa"],"summary":"Check admin second-factor status","security":[{"FirebaseIdToken":[]}],"responses":{"200":{"description":"The current Firebase sign-in second-factor status.","content":{"application/json":{"schema":{"type":"object","properties":{"verified":{"type":"boolean"}},"required":["verified"]}}}},"401":{"$ref":"#/components/responses/Unauthorized"},"500":{"$ref":"#/components/responses/ServerError"}}}},"/api/auth/admin-mfa/send":{"post":{"tags":["admin-mfa"],"summary":"Send admin sign-in code","description":"Requires an admin Firebase ID token. Sending to the backup address replaces the pending code.","security":[{"FirebaseIdToken":[]}],"requestBody":{"content":{"application/json":{"schema":{"type":"object","properties":{"target":{"type":"string","enum":["primary","backup"],"default":"primary"}}}}}},"responses":{"200":{"description":"The code was sent or queued for delivery."},"400":{"$ref":"#/components/responses/BadRequest"},"401":{"$ref":"#/components/responses/Unauthorized"},"500":{"$ref":"#/components/responses/ServerError"}}}},"/api/auth/admin-mfa/verify":{"post":{"tags":["admin-mfa"],"summary":"Verify admin sign-in code","security":[{"FirebaseIdToken":[]}],"requestBody":{"$ref":"#/components/requestBodies/CodeOnlyRequest"},"responses":{"200":{"description":"The code is valid and the admin sign-in is marked verified."},"400":{"$ref":"#/components/responses/BadRequest"},"401":{"$ref":"#/components/responses/Unauthorized"},"500":{"$ref":"#/components/responses/ServerError"}}}},"/api/auth/admin-mfa/backup-email":{"get":{"tags":["admin-mfa"],"summary":"Get admin backup email settings","security":[{"FirebaseIdToken":[]}],"responses":{"200":{"description":"Current primary and backup email settings."},"401":{"$ref":"#/components/responses/Unauthorized"},"500":{"$ref":"#/components/responses/ServerError"}}},"post":{"tags":["admin-mfa"],"summary":"Manage admin backup email","description":"Requires an admin Firebase ID token and a verified second factor for this sign-in.","security":[{"FirebaseIdToken":[]}],"requestBody":{"$ref":"#/components/requestBodies/BackupEmailActionRequest"},"responses":{"200":{"description":"The backup email action completed."},"400":{"$ref":"#/components/responses/BadRequest"},"401":{"$ref":"#/components/responses/Unauthorized"},"500":{"$ref":"#/components/responses/ServerError"}}}},"/api/admin/delete-user":{"post":{"tags":["admin-users"],"summary":"Delete a user account","description":"Requires an admin Firebase ID token and a verified second factor. Protected admin accounts cannot be deleted.","security":[{"FirebaseIdToken":[]}],"requestBody":{"$ref":"#/components/requestBodies/DeleteUserRequest"},"responses":{"200":{"description":"The account was deleted."},"400":{"$ref":"#/components/responses/BadRequest"},"401":{"$ref":"#/components/responses/Unauthorized"},"403":{"description":"The target is a protected admin account."},"500":{"$ref":"#/components/responses/ServerError"}}}},"/api/admin/test-create-user":{"post":{"tags":["admin-users"],"summary":"Simulate user creation (test only)","description":"Returns a simulated user-creation response; it does not create a real account.","requestBody":{"$ref":"#/components/requestBodies/TestCreateUserRequest"},"responses":{"200":{"description":"A simulated account result."},"400":{"$ref":"#/components/responses/BadRequest"},"500":{"$ref":"#/components/responses/ServerError"}}}},"/api/admin/config-check":{"get":{"tags":["configuration"],"summary":"Check Firebase Admin configuration","description":"Reports whether required Firebase Admin settings appear configured. Secret values are not returned.","responses":{"200":{"description":"The configuration status and validation details."},"500":{"$ref":"#/components/responses/ServerError"}}}}},"components":{"securitySchemes":{"FirebaseIdToken":{"type":"http","scheme":"bearer","bearerFormat":"Firebase ID token","description":"Paste the Firebase Authentication ID token, without the \"Bearer \" prefix."}},"requestBodies":{"JsonObject":{"required":true,"content":{"application/json":{"schema":{"type":"object","additionalProperties":true}}}},"EmailRequest":{"required":true,"content":{"application/json":{"schema":{"type":"object","required":["email"],"properties":{"email":{"type":"string","format":"email"}}}}}},"SignupVerificationRequest":{"required":true,"content":{"application/json":{"schema":{"type":"object","required":["email","firstName","lastName"],"properties":{"email":{"type":"string","format":"email"},"firstName":{"type":"string"},"lastName":{"type":"string"}}}}}},"MobileSignupVerificationRequest":{"required":true,"content":{"application/json":{"schema":{"type":"object","required":["email","firstName","lastName","recoveryEmail","role"],"properties":{"email":{"type":"string","format":"email"},"firstName":{"type":"string"},"lastName":{"type":"string"},"recoveryEmail":{"type":"string","format":"email"},"role":{"type":"string","description":"Application role."}}}}}},"VerificationCodeRequest":{"required":true,"content":{"application/json":{"schema":{"type":"object","required":["email","code"],"properties":{"email":{"type":"string","format":"email"},"code":{"type":"string","pattern":"^\\d{6}$"}}}}}},"MobileSignupRequest":{"required":true,"content":{"application/json":{"schema":{"type":"object","required":["email","code","firstName","lastName","role","password"],"properties":{"email":{"type":"string","format":"email"},"code":{"type":"string","description":"Six-digit code, or VERIFIED for the web completion flow."},"firstName":{"type":"string"},"lastName":{"type":"string"},"recoveryEmail":{"type":"string","format":"email"},"role":{"type":"string"},"password":{"type":"string","format":"password","minLength":7},"teacherConsent":{"type":"boolean"},"dataProcessingConsent":{"type":"boolean"}}}}}},"CodeOnlyRequest":{"required":true,"content":{"application/json":{"schema":{"type":"object","required":["code"],"properties":{"code":{"type":"string","pattern":"^\\d{6}$"}}}}}},"BackupEmailActionRequest":{"required":true,"content":{"application/json":{"schema":{"type":"object","required":["action"],"properties":{"action":{"type":"string","enum":["start","confirm","remove"]},"email":{"type":"string","format":"email","description":"Required for action=start."},"code":{"type":"string","pattern":"^\\d{6}$","description":"Required for action=confirm."}}}}}},"DeleteUserRequest":{"required":true,"content":{"application/json":{"schema":{"type":"object","required":["uid"],"properties":{"uid":{"type":"string"}}}}}},"TestCreateUserRequest":{"required":true,"content":{"application/json":{"schema":{"type":"object","required":["name","email","password","role","adminEmail"],"properties":{"name":{"type":"string"},"email":{"type":"string","format":"email"},"password":{"type":"string","format":"password"},"role":{"type":"string"},"adminEmail":{"type":"string","format":"email"}}}}}}},"responses":{"BadRequest":{"description":"The request is invalid.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"Unauthorized":{"description":"A valid admin Firebase ID token is required.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"ServerError":{"description":"The server could not process the request.","content":{"application/json":{"schema":{"$ref":"#/components/schemas/ErrorResponse"}}}},"VerificationSent":{"description":"The request was accepted; an email may have been sent.","content":{"application/json":{"schema":{"type":"object","properties":{"success":{"type":"boolean"},"message":{"type":"string"},"email":{"type":"string","format":"email"}}}}}},"CodeVerified":{"description":"The verification code is valid.","content":{"application/json":{"schema":{"type":"object","properties":{"success":{"type":"boolean"},"verified":{"type":"boolean"},"email":{"type":"string","format":"email"},"message":{"type":"string"}}}}}}},"schemas":{"ErrorResponse":{"type":"object","properties":{"error":{"type":"string"},"success":{"type":"boolean"},"code":{"type":"string"}}},"SuccessResponse":{"type":"object","properties":{"success":{"type":"boolean"},"message":{"type":"string"}},"required":["success"]},"HealthResponse":{"type":"object","properties":{"status":{"type":"string","enum":["healthy","unhealthy"]},"timestamp":{"type":"string","format":"date-time"},"version":{"type":"string"},"environment":{"type":"string"},"network":{"type":"object","additionalProperties":{"type":["string","null"]}},"services":{"type":"object","additionalProperties":{"type":"string"}}}},"HealthPostResponse":{"type":"object","properties":{"status":{"type":"string"},"receivedData":{"type":"object","additionalProperties":true},"message":{"type":"string"}}},"AccountCreatedResponse":{"type":"object","properties":{"success":{"type":"boolean"},"message":{"type":"string"},"user":{"type":"object","properties":{"uid":{"type":"string"},"email":{"type":"string","format":"email"},"firstName":{"type":"string"},"lastName":{"type":"string"},"fullName":{"type":"string"},"role":{"type":"string"}}}}}}}}</script>
+    <script>
+      (() => {
+        const openApiLink = document.getElementById('openapi-link')
+        const listStatus = document.getElementById('list-status')
+        const endpointGroups = document.getElementById('endpoint-groups')
+        const groupNav = document.getElementById('group-nav')
+        const schemaList = document.getElementById('schema-list')
+        const filterInput = document.getElementById('endpoint-filter')
+        const tokenInput = document.getElementById('firebase-token')
+        const authorizeButton = document.getElementById('authorize-open')
+        const authorizeDialog = document.getElementById('authorize-dialog')
+        const authorizeForm = document.getElementById('authorize-form')
+        const authorizeStatus = document.getElementById('authorize-status')
+        const authorizeClear = document.getElementById('authorize-clear')
+        const authorizeClose = document.getElementById('authorize-close')
+        const apiOrigin = 'https://coby-picks-web-csww.vercel.app'
+        const methodOrder = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options']
+        const spec = JSON.parse(document.getElementById('openapi-spec').textContent)
+        let bearerToken = ''
+
+        function updateAuthorizationState() {
+          authorizeButton.textContent = bearerToken ? 'Authorized' : 'Authorize'
+          authorizeButton.classList.toggle('is-authorized', Boolean(bearerToken))
+          authorizeButton.setAttribute('aria-label', bearerToken ? 'Authorized. Manage Firebase token.' : 'Authorize API requests')
+        }
+
+        function resolveReference(value) {
+          if (typeof value === 'string' && value.startsWith('#/')) {
+            return value.slice(2).split('/').reduce((result, part) => result?.[part.replace(/~1/g, '/').replace(/~0/g, '~')], spec)
+          }
+          if (value && typeof value === 'object' && value.$ref) return resolveReference(value.$ref)
+          return value
+        }
+
+        function make(tag, className, text) {
+          const element = document.createElement(tag)
+          if (className) element.className = className
+          if (text !== undefined) element.textContent = text
+          return element
+        }
+
+        function schemaDescription(schema) {
+          const resolved = resolveReference(schema) || {}
+          if (resolved.type === 'object' && resolved.properties) {
+            return Object.fromEntries(Object.entries(resolved.properties).map(([name, property]) => {
+              const value = resolveReference(property) || {}
+              return [name, {
+                type: value.type || 'object',
+                ...(value.format ? { format: value.format } : {}),
+                ...(value.enum ? { enum: value.enum } : {}),
+                ...(value.description ? { description: value.description } : {}),
+                ...(value.required ? { required: true } : {}),
+              }]
+            }))
+          }
+          return resolved
+        }
+
+        function exampleValue(property) {
+          const value = resolveReference(property) || {}
+          if (value.example !== undefined) return value.example
+          if (value.default !== undefined) return value.default
+          if (value.enum?.length) return value.enum[0]
+          if (value.type === 'object') return {}
+          if (value.type === 'array') return []
+          if (value.type === 'boolean') return false
+          if (value.type === 'integer' || value.type === 'number') return 0
+          return ''
+        }
+
+        function requestExample(operation) {
+          const body = resolveReference(operation.requestBody)
+          const schema = resolveReference(body?.content?.['application/json']?.schema)
+          if (schema?.example !== undefined) return schema.example
+          if (schema?.type === 'object' && schema.properties) {
+            return Object.fromEntries(Object.entries(schema.properties).map(([name, property]) => [name, exampleValue(property)]))
+          }
+          return {}
+        }
+
+        function addResponseDetails(details, operation) {
+          const responses = make('div')
+          const responseLabel = make('span', 'detail-label', 'Responses')
+          responses.append(responseLabel)
+          for (const [code, responseValue] of Object.entries(operation.responses || {})) {
+            const response = resolveReference(responseValue)
+            const line = make('div', 'response-list', `${code} · ${response?.description || 'Response'}`)
+            responses.append(line)
+          }
+          details.append(responses)
+        }
+
+        function addTryIt(details, path, method, operation) {
+          const tryout = make('div', 'tryout')
+          const warning = make('p', 'endpoint-description', 'This sends a real request to the Coby Picks API. Use test accounts for actions that send emails or change account data.')
+          tryout.append(warning)
+
+          let bodyEditor
+          if (!['get', 'head', 'options'].includes(method)) {
+            const bodyLabel = make('label', '', 'Request body (JSON)')
+            bodyEditor = make('textarea')
+            bodyEditor.spellcheck = false
+            bodyEditor.value = JSON.stringify(requestExample(operation), null, 2)
+            bodyLabel.append(bodyEditor)
+            tryout.append(bodyLabel)
+          }
+
+          const button = make('button', '', 'Try it')
+          button.type = 'button'
+          const result = make('div', 'tryout-result')
+          result.setAttribute('role', 'status')
+          result.setAttribute('aria-live', 'polite')
+          button.addEventListener('click', async () => {
+            const requestUrl = new URL(path, `${apiOrigin}/`)
+            const headers = { Accept: 'application/json' }
+            if (bearerToken) headers.Authorization = `Bearer ${bearerToken}`
+            const options = { method: method.toUpperCase(), headers }
+
+            if (bodyEditor) {
+              try {
+                options.body = JSON.stringify(JSON.parse(bodyEditor.value))
+                headers['Content-Type'] = 'application/json'
+              } catch (error) {
+                result.replaceChildren(make('p', 'status error', `Invalid JSON request body: ${error.message}`))
+                result.classList.add('is-error')
+                return
+              }
+            }
+
+            button.disabled = true
+            button.setAttribute('aria-busy', 'true')
+            button.textContent = 'Sending…'
+            result.classList.remove('is-success', 'is-error')
+            result.replaceChildren()
+            const controller = new AbortController()
+            const timeoutId = window.setTimeout(() => controller.abort(), 20000)
+            options.signal = controller.signal
+            try {
+              const response = await fetch(requestUrl, options)
+              const contentType = response.headers.get('content-type') || ''
+              const rawBody = response.status === 204 || response.status === 205
+                ? ''
+                : await response.text()
+              let responseBody = rawBody
+              if (contentType.includes('json') && rawBody) {
+                try {
+                  responseBody = JSON.stringify(JSON.parse(rawBody), null, 2)
+                } catch {
+                  responseBody = `${rawBody}\n\nWarning: The server declared JSON but returned malformed JSON.`
+                }
+              }
+              const statusText = `HTTP ${response.status} ${response.statusText}`.trim()
+              result.classList.toggle('is-success', response.ok)
+              result.classList.toggle('is-error', !response.ok)
+              result.append(make('span', 'response-status', statusText))
+              result.append(make('pre', '', responseBody || '(empty response)'))
+              if (!response.ok && response.status === 404) {
+                result.append(make('p', 'endpoint-description', 'This route returned 404 on the deployed server. It may not be included in the version currently deployed.'))
+              }
+            } catch (error) {
+              result.classList.add('is-error')
+              const message = error.name === 'AbortError'
+                ? 'Request timed out after 20 seconds. Check the API server and try again.'
+                : error instanceof TypeError
+                  ? `The browser could not reach the API. Check that the Coby Picks API is online and that API_DOCS_ORIGIN on its Vercel deployment matches this docs website. Browser network and CORS errors are reported as TypeError.`
+                  : `Request failed: ${error.message || 'Unknown network error.'}`
+              result.append(make('p', 'status error', message))
+            } finally {
+              window.clearTimeout(timeoutId)
+              button.disabled = false
+              button.setAttribute('aria-busy', 'false')
+              button.textContent = 'Try it'
+            }
+          })
+          tryout.append(button, result)
+          details.append(tryout)
+        }
+
+        function renderOperation(path, method, operation) {
+          const item = make('article', 'endpoint')
+          const summary = make('button', 'endpoint-summary')
+          summary.type = 'button'
+          summary.setAttribute('aria-expanded', 'false')
+          const badge = make('span', `method method-${method}`, method.toUpperCase())
+          const pathText = make('code', 'endpoint-path', path)
+          const description = make('span', 'endpoint-summary-text', operation.summary || operation.description || 'API operation')
+          const chevron = make('span', 'chevron', '⌄')
+          summary.append(badge, pathText, description, chevron)
+
+          const details = make('div', 'endpoint-details')
+          if (operation.description) details.append(make('p', 'endpoint-description', operation.description))
+          const body = resolveReference(operation.requestBody)
+          const bodySchema = resolveReference(body?.content?.['application/json']?.schema)
+          if (bodySchema) {
+            details.append(make('span', 'detail-label', `Request body${body.required ? ' · required' : ''}`))
+            details.append(make('pre', 'schema-view', JSON.stringify(schemaDescription(bodySchema), null, 2)))
+          }
+          if (operation.security?.length) {
+            details.append(make('p', 'endpoint-description', 'Requires a Firebase ID token. Enter it in the authorization field above to use this endpoint.'))
+          }
+          addResponseDetails(details, operation)
+          addTryIt(details, path, method, operation)
+
+          summary.addEventListener('click', () => {
+            const expanded = item.classList.toggle('is-open')
+            summary.setAttribute('aria-expanded', String(expanded))
+            chevron.textContent = expanded ? '⌃' : '⌄'
+          })
+          item.append(summary, details)
+          return item
+        }
+
+        function renderSchemas() {
+          for (const [name, schemaValue] of Object.entries(spec.components?.schemas || {})) {
+            const item = make('article', 'schema-item')
+            const heading = make('button', 'schema-heading')
+            heading.type = 'button'
+            heading.setAttribute('aria-expanded', 'false')
+            heading.append(make('span', '', name), make('span', '', 'Expand'))
+            const content = make('div', 'schema-content')
+            content.append(make('pre', 'schema-view', JSON.stringify(schemaDescription({ $ref: `#/components/schemas/${name}` }), null, 2)))
+            heading.addEventListener('click', () => {
+              const expanded = item.classList.toggle('is-open')
+              heading.setAttribute('aria-expanded', String(expanded))
+              heading.lastElementChild.textContent = expanded ? 'Collapse' : 'Expand'
+            })
+            item.append(heading, content)
+            schemaList.append(item)
+          }
+        }
+
+        function renderEndpoints(filter = '') {
+          const query = filter.trim().toLowerCase()
+          endpointGroups.replaceChildren()
+          groupNav.replaceChildren()
+          let visibleCount = 0
+          for (const tag of spec.tags || []) {
+            const operations = []
+            for (const [path, pathItem] of Object.entries(spec.paths || {})) {
+              for (const method of methodOrder) {
+                const operation = pathItem[method]
+                if (!operation || !operation.tags?.includes(tag.name)) continue
+                const text = `${method} ${path} ${operation.summary || ''} ${operation.description || ''} ${tag.name}`.toLowerCase()
+                if (!query || text.includes(query)) operations.push({ path, method, operation })
+              }
+            }
+            if (!operations.length) continue
+            visibleCount += operations.length
+            const section = make('section', 'api-group')
+            const sectionId = `api-${tag.name.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase()}`
+            section.id = sectionId
+            const heading = make('h2', 'group-heading')
+            heading.append(document.createTextNode(tag.name), make('span', 'group-count', `${operations.length} endpoint${operations.length === 1 ? '' : 's'}`))
+            section.append(heading)
+            if (tag.description) section.append(make('p', 'group-description', tag.description))
+            const jumpLink = make('a', '', tag.name)
+            jumpLink.href = `#${sectionId}`
+            groupNav.append(jumpLink)
+            const list = make('div', 'endpoint-list')
+            for (const { path, method, operation } of operations) list.append(renderOperation(path, method, operation))
+            section.append(list)
+            endpointGroups.append(section)
+          }
+          if (!visibleCount) endpointGroups.append(make('div', 'empty-state', 'No endpoints match that filter.'))
+          listStatus.textContent = query
+            ? `${visibleCount} matching endpoint${visibleCount === 1 ? '' : 's'}`
+            : `${visibleCount} Coby Picks API endpoints · Methods and routes reflect the current server implementation.`
+          document.getElementById('api-endpoint-count').textContent = String(
+            Object.values(spec.paths || {}).reduce((count, pathItem) => count + methodOrder.filter((method) => pathItem[method]).length, 0),
+          )
+          document.getElementById('api-category-count').textContent = String((spec.tags || []).length)
+          document.getElementById('api-version').textContent = `v${spec.info.version}`
+        }
+
+        function loadReference() {
+          renderEndpoints(filterInput.value)
+          renderSchemas()
+          openApiLink.href = `data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(spec, null, 2))}`
+          openApiLink.hidden = false
+          listStatus.classList.remove('error')
+        }
+
+        filterInput.addEventListener('input', () => {
+          if (spec) renderEndpoints(filterInput.value)
+        })
+
+        authorizeButton.addEventListener('click', () => {
+          authorizeStatus.textContent = bearerToken
+            ? 'A token is set for this page. Replace it below or remove it. Its validity is checked by the API when you send a request.'
+            : 'Enter a Firebase ID token from a Coby Picks sign-in. The token is not validated until an API request is sent.'
+          authorizeStatus.classList.remove('error')
+          tokenInput.value = ''
+          authorizeDialog.showModal()
+          tokenInput.focus()
+        })
+
+        authorizeForm.addEventListener('submit', (event) => {
+          event.preventDefault()
+          const enteredToken = tokenInput.value.trim().replace(/^Bearer\s+/i, '')
+          if (!enteredToken) {
+            authorizeStatus.textContent = 'Paste a Firebase ID token to authorize API requests.'
+            authorizeStatus.classList.add('error')
+            tokenInput.focus()
+            return
+          }
+
+          bearerToken = enteredToken
+          tokenInput.value = ''
+          authorizeStatus.textContent = 'Token added to this page. The API checks the token when you send a request.'
+          authorizeStatus.classList.remove('error')
+          updateAuthorizationState()
+          authorizeDialog.close()
+        })
+
+        authorizeClear.addEventListener('click', () => {
+          bearerToken = ''
+          tokenInput.value = ''
+          authorizeStatus.textContent = 'Token removed. Protected requests will be sent without authorization.'
+          authorizeStatus.classList.remove('error')
+          updateAuthorizationState()
+        })
+
+        authorizeClose.addEventListener('click', () => {
+          tokenInput.value = ''
+          authorizeDialog.close()
+        })
+
+        authorizeDialog.addEventListener('close', () => {
+          tokenInput.value = ''
+        })
+
+        updateAuthorizationState()
+        loadReference()
+      })()
+    </script>
+  </body>
+</html>
